@@ -2,26 +2,22 @@ import numpy as np
 import math
 
 def sigmoidActivate(np_arr):
-    arr = np_arr[0]
-    return np.array([1 / (1 + math.exp(-num)) for num in arr])
+    return 1 / (1 + np.exp(np_arr))
 
 def sigmoidActivateGradient(np_arr):
-    arr = np_arr[0]
-    return np.array([math.exp(-num) / (1 + math.exp(-num)) ** 2 for num in arr])
+    return sigmoidActivate(np_arr) * (1 - sigmoidActivate(np_arr))
 
 class Network:
     def __init__(self, structure: list):
         self.structure = structure
         self.size = len(structure)
-        self.bias = [np.random.normal(0, 1, size=(size, 1)) for size in structure[1:]]
+        self.bias = [np.random.normal(0, 1, size=(size)) for size in structure[1:]]
         self.weights = [np.random.normal(0, 1, size=(structure[layer + 1], structure[layer])) for layer in range(self.size - 1)]
 
     def activate(self, inputs):
-        current_layer_inputs = inputs
         for layer in range(self.size - 1):
-            current_layer_output = sigmoidActivate(np.dot(self.weights[layer], current_layer_inputs) + self.bias[layer])
-            current_layer_inputs = current_layer_output
-        return current_layer_output
+            inputs = sigmoidActivate(np.dot(self.weights[layer], inputs) + self.bias[layer])
+        return inputs
     
     def learn(self, training_data, learn_rate):
         weight_alterations = [np.zeros(weight_matrix.shape) for weight_matrix in self.weights]
@@ -31,19 +27,19 @@ class Network:
             inputs = training_pair[0]
             expected_output = training_pair[1]
 
-            inputs_history = [np.array([inputs])]
+            inputs_history = [inputs]
             current_layer_inputs = inputs
             for layer in range(self.size - 1):
-                current_layer_output = np.dot(self.weights[layer], current_layer_inputs) + self.bias[layer].transpose()
+                current_layer_output = np.dot(self.weights[layer], current_layer_inputs) + self.bias[layer]
                 inputs_history.append(current_layer_output)
                 current_layer_inputs = sigmoidActivate(current_layer_output)
 
-            current_layer_cost_node_gradient = np.array([2 * (current_layer_inputs - expected_output) * sigmoidActivateGradient(inputs_history[-1])]).transpose()
+            current_layer_cost_node_gradient = np.array(2 * (current_layer_inputs - expected_output) * sigmoidActivateGradient(inputs_history[-1]))
             for layer in range(self.size - 1):
                 bias_alterations[-(layer + 1)] -= current_layer_cost_node_gradient
-                weight_alterations[-(layer + 1)] -= current_layer_cost_node_gradient * inputs_history[-(layer + 2)]
-                current_layer_cost_node_gradient = np.array(np.dot(self.weights[-(layer + 1)].transpose(), current_layer_cost_node_gradient) * np.array([sigmoidActivateGradient(inputs_history[-(layer + 2)])]).transpose())
-                
+                weight_alterations[-(layer + 1)] -= np.dot(current_layer_cost_node_gradient.reshape((self.structure[-(layer+1)], 1)), inputs_history[-(layer + 2)].reshape((1, self.structure[-(layer+2)])))
+                current_layer_cost_node_gradient = np.array(np.dot(self.weights[-(layer + 1)].T, current_layer_cost_node_gradient) * sigmoidActivateGradient(inputs_history[-(layer + 2)]))
+
         for layer in range(self.size - 1):
             weight_alterations[layer] *= learn_rate / len(training_data)
             bias_alterations[layer] *= learn_rate / len(training_data)
