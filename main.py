@@ -1,15 +1,15 @@
-import pygame, sys, time
+import pygame, sys, time, math
 from network import Network
 import numpy as np
 pygame.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 100, 100
-LEARN_RATE = 1.6
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
+LEARN_RATE = 2
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Machine Learning Demo')
 
 def testInput(input):
-    result = 1 if 0.1 * input[0] + 45 < input[1] else 0
+    result = 1 if input[0] < input[1] else 0
     return np.array([1 - result, result])
 
 def main():
@@ -25,7 +25,8 @@ def main():
             x = np.random.rand()
             y = np.random.rand()
             inputs = [x, y]
-            training_data.append(np.array([inputs, testInput(inputs * 100)]))
+            testInputs = [x * 100, y * 100]
+            training_data.append(np.array([inputs, testInput(testInputs)]))
         net.learn(training_data, LEARN_RATE)
 
         screen.fill('white')
@@ -33,7 +34,7 @@ def main():
             for y in range(100):
                 outputs = net.activate(np.array([x/100, y/100]))
                 if outputs[0] > outputs[1]:
-                    pygame.draw.rect(screen, 'black', pygame.Rect(x, y, 1, 1))
+                    pygame.draw.rect(screen, 'black', pygame.Rect(x * 8, y * 8, 8, 8))
 
         pygame.display.update()
 
