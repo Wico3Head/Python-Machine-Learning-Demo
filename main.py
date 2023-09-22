@@ -4,7 +4,8 @@ import numpy as np
 pygame.init()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
-LEARN_RATE = 0.2
+LEARN_RATE = 0.5
+REGULARISATION_CONSTANT = 2
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Machine Learning Demo')
 
@@ -27,7 +28,7 @@ def main():
             inputs = [x, y]
             testInputs = [x * 100, y * 100]
             training_data.append(np.array([inputs, testInput(testInputs)]))
-        net.learn(training_data, LEARN_RATE)
+        net.learn(training_data, LEARN_RATE, REGULARISATION_CONSTANT)
 
         screen.fill('white')
         for x in range(100):
