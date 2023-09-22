@@ -4,7 +4,7 @@ import numpy as np
 pygame.init()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
-LEARN_RATE = 2
+LEARN_RATE = 0.2
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Machine Learning Demo')
 
