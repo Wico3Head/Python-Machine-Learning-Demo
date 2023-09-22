@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 def sigmoidActivate(np_arr):
     return 1 / (1 + np.exp(np_arr))
